@@ -159,7 +159,7 @@ iris/
 
 ## Why "iris"
 
-The Greek messenger goddess — the rainbow bridge between worlds. iris carries word between your session and your terminal, your past and your future, your backlog and your team. A prism refracts one beam of white light into its spectrum; iris refracts one session into everything around it.
+Named twice over: the eye's aperture that opens to let the light in, and the Greek goddess who carried messages between worlds. iris keeps your session in focus and moves what matters between it and everything around it — your terminal, your past sessions, your backlog, your team.
 
 ## License
 

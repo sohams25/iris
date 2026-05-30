@@ -1,65 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-label="iris — the messenger layer for Claude Code">
   <defs>
     <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#070709"/>
-      <stop offset="0.6" stop-color="#050506"/>
-      <stop offset="1" stop-color="#0a0a0e"/>
+      <stop offset="0" stop-color="#070709"/><stop offset="0.6" stop-color="#050506"/><stop offset="1" stop-color="#0a0a0e"/>
     </linearGradient>
-    <radialGradient id="aura" cx="0.26" cy="0.32" r="0.5">
-      <stop offset="0" stop-color="#5E6AD2" stop-opacity="0.16"/>
-      <stop offset="1" stop-color="#5E6AD2" stop-opacity="0"/>
+    <radialGradient id="aura" cx="0.817" cy="0.500" r="0.34">
+      <stop offset="0" stop-color="#5E6AD2" stop-opacity="0.20"/><stop offset="1" stop-color="#5E6AD2" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="spectrum" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#ff6b6b"/>
-      <stop offset="0.18" stop-color="#ffa24b"/>
-      <stop offset="0.36" stop-color="#ffd24b"/>
-      <stop offset="0.54" stop-color="#54d18a"/>
-      <stop offset="0.72" stop-color="#49b6ff"/>
-      <stop offset="0.86" stop-color="#6a7bff"/>
-      <stop offset="1" stop-color="#b06aff"/>
-    </linearGradient>
-    <linearGradient id="word" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#c7cbe8"/>
-    </linearGradient>
+    <radialGradient id="pupil" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#5E6AD2" stop-opacity="0.35"/><stop offset="1" stop-color="#5E6AD2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c7cbe8"/></linearGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5E6AD2"/><stop offset="1" stop-color="#8b93e8"/></linearGradient>
   </defs>
 
   <rect x="1" y="1" width="1198" height="378" rx="18" fill="url(#ink)"/>
   <rect x="1" y="1" width="1198" height="378" rx="18" fill="url(#aura)"/>
 
-  <!-- version chip -->
   <rect x="1042" y="34" width="122" height="34" rx="17" fill="none" stroke="#ffffff" stroke-opacity="0.14"/>
-  <text x="1103" y="56" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace" font-size="15" letter-spacing="1" fill="#8b93e8">v0.2.0</text>
+  <text x="1103" y="56" text-anchor="middle" font-family="ui-monospace, 'JetBrains Mono', Menlo, monospace" font-size="15" letter-spacing="1" fill="#8b93e8">v0.2.0</text>
 
-  <!-- prism refraction: white light in, disciplined spectrum out -->
-  <g>
-    <line x1="742" y1="206" x2="884" y2="206" stroke="#EDEDEF" stroke-opacity="0.8" stroke-width="2"/>
-    <polygon points="906,150 862,252 950,252" fill="#5E6AD2" fill-opacity="0.07" stroke="#5E6AD2" stroke-opacity="0.55" stroke-width="1.5"/>
-    <g stroke-width="1.6" stroke-linecap="round" fill="none">
-      <path d="M924 206 L1128 168" stroke="#ff6b6b" stroke-opacity="0.9"/>
-      <path d="M924 206 L1128 182" stroke="#ffa24b" stroke-opacity="0.9"/>
-      <path d="M924 206 L1128 196" stroke="#ffd24b" stroke-opacity="0.9"/>
-      <path d="M924 206 L1128 210" stroke="#54d18a" stroke-opacity="0.9"/>
-      <path d="M924 206 L1128 224" stroke="#49b6ff" stroke-opacity="0.9"/>
-      <path d="M924 206 L1128 238" stroke="#6a7bff" stroke-opacity="0.9"/>
-      <path d="M924 206 L1128 252" stroke="#b06aff" stroke-opacity="0.9"/>
-    </g>
-  </g>
+  <!-- iris aperture mark -->
+  <circle cx="980" cy="190" r="86" fill="url(#pupil)"/>
+  <circle cx="980" cy="190" r="78" fill="none" stroke="#5E6AD2" stroke-opacity="0.22" stroke-width="1.4"/>
+  <path d="M1006.6 194.7 L1001.9 250.1 A64 64 0 0 0 1043.0 201.1 Z" fill="#5E6AD2" fill-opacity="0.10" stroke="#5E6AD2" stroke-opacity="0.72" stroke-width="1.6"/>
+  <path d="M989.2 215.4 L938.9 239.0 A64 64 0 0 0 1001.9 250.1 Z" fill="#5E6AD2" fill-opacity="0.15" stroke="#5E6AD2" stroke-opacity="0.72" stroke-width="1.6"/>
+  <path d="M962.6 210.7 L917.0 178.9 A64 64 0 0 0 938.9 239.0 Z" fill="#5E6AD2" fill-opacity="0.10" stroke="#5E6AD2" stroke-opacity="0.72" stroke-width="1.6"/>
+  <path d="M953.4 185.3 L958.1 129.9 A64 64 0 0 0 917.0 178.9 Z" fill="#5E6AD2" fill-opacity="0.15" stroke="#5E6AD2" stroke-opacity="0.72" stroke-width="1.6"/>
+  <path d="M970.8 164.6 L1021.1 141.0 A64 64 0 0 0 958.1 129.9 Z" fill="#5E6AD2" fill-opacity="0.10" stroke="#5E6AD2" stroke-opacity="0.72" stroke-width="1.6"/>
+  <path d="M997.4 169.3 L1043.0 201.1 A64 64 0 0 0 1021.1 141.0 Z" fill="#5E6AD2" fill-opacity="0.15" stroke="#5E6AD2" stroke-opacity="0.72" stroke-width="1.6"/>
+  <polygon points="1006.6,194.7 989.2,215.4 962.6,210.7 953.4,185.3 970.8,164.6 997.4,169.3" fill="#08080c" stroke="#9aa2ef" stroke-opacity="0.7" stroke-width="1.6"/>
+  <circle cx="980" cy="190" r="5" fill="#9aa2ef"/>
 
-  <!-- wordmark -->
-  <text x="70" y="214" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-        font-size="132" font-weight="800" letter-spacing="-3" fill="url(#word)">iris</text>
-
-  <!-- refracted signature underline -->
-  <rect x="76" y="234" width="206" height="5" rx="2.5" fill="url(#spectrum)"/>
-
-  <!-- tagline -->
-  <text x="78" y="280" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-        font-size="25" font-weight="500" letter-spacing="0.3" fill="#9aa1b8">the messenger layer for Claude Code</text>
-
-  <!-- feature row -->
-  <text x="78" y="328" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace"
-        font-size="16.5" letter-spacing="0.5" fill="#6b73a0">memory<tspan fill="#5E6AD2">&#160;&#160;/&#160;&#160;</tspan>backlog<tspan fill="#5E6AD2">&#160;&#160;/&#160;&#160;</tspan>swarm<tspan fill="#5E6AD2">&#160;&#160;/&#160;&#160;</tspan>connect-to-anything</text>
+  <text x="70" y="214" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="132" font-weight="800" letter-spacing="-3" fill="url(#word)">iris</text>
+  <rect x="76" y="234" width="206" height="5" rx="2.5" fill="url(#rule)"/>
+  <text x="78" y="280" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="25" font-weight="500" letter-spacing="0.3" fill="#9aa1b8">the messenger layer for Claude Code</text>
+  <text x="78" y="328" font-family="ui-monospace, 'JetBrains Mono', Menlo, monospace" font-size="16.5" letter-spacing="0.5" fill="#6b73a0">memory<tspan fill="#5E6AD2">&#160;&#160;/&#160;&#160;</tspan>backlog<tspan fill="#5E6AD2">&#160;&#160;/&#160;&#160;</tspan>swarm<tspan fill="#5E6AD2">&#160;&#160;/&#160;&#160;</tspan>connect-to-anything</text>
 
   <rect x="1" y="1" width="1198" height="378" rx="18" fill="none" stroke="#ffffff" stroke-opacity="0.09"/>
 </svg>
