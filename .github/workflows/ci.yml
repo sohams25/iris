@@ -27,9 +27,9 @@ jobs:
       - name: Doctor (informational — markdown backend, no Slack)
         env:
           MEMORY_BACKEND: markdown
-          PROJECTS_DIR: Tasks
+          PROJECTS_DIR: Projects
         run: |
-          mkdir -p Tasks
+          mkdir -p Projects
           python3 scripts/doctor.py || true
       - name: Verify no AI footers in commit messages
         run: |

@@ -97,9 +97,10 @@ def check_memory_backend() -> tuple[bool, str]:
 
 def check_scripts_present() -> tuple[bool, str]:
     missing = []
-    scripts = ("_iris_paths.py", "parse-tasks.py", "queue.py", "notify.py",
-               "notify-slack.sh", "handover-new.py", "handover-validate.py",
-               "build-wave-plan.py", "detect-verify.sh", "memory.py")
+    scripts = ("_iris_paths.py", "parse-tasks.py", "queue.py", "brain.py",
+               "takeover.py", "notify.py", "notify-slack.sh", "handover-new.py",
+               "handover-validate.py", "build-wave-plan.py", "detect-verify.sh",
+               "memory.py")
     for s in scripts:
         if not (REPO_ROOT / "scripts" / s).exists():
             missing.append(s)
@@ -142,7 +143,7 @@ def check_projects_dir() -> tuple[bool, str]:
                 if line.strip().startswith("PROJECTS_DIR="):
                     projects_dir = line.partition("=")[2].strip().strip('"').strip("'")
                     break
-    projects_dir = projects_dir or "Tasks"
+    projects_dir = projects_dir or "Projects"
     p = REPO_ROOT / projects_dir
     if not p.exists():
         return _fail(f"{projects_dir}/ missing (PROJECTS_DIR={projects_dir})")
@@ -188,8 +189,8 @@ def check_skill_symlinks() -> tuple[bool, str]:
 
 def check_slash_commands() -> tuple[bool, str]:
     cmds_dir = REPO_ROOT / ".claude" / "commands"
-    needed = ["submit.md", "run.md", "status.md", "backlog.md",
-              "rollover.md", "memory.md", "doctor.md", "new-task.md"]
+    needed = ["submit.md", "run.md", "status.md", "backlog.md", "rollover.md",
+              "memory.md", "doctor.md", "new-task.md", "takeover.md"]
     missing = [c for c in needed if not (cmds_dir / c).exists()]
     if missing:
         return _fail(f"missing: {', '.join(missing)}")

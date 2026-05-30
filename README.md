@@ -2,12 +2,12 @@
 
 <p>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-5E6AD2?style=flat-square&labelColor=0a0a0e"></a>
-  <img alt="version" src="https://img.shields.io/badge/version-0.1.0-ECEDF1?style=flat-square&labelColor=0a0a0e">
-  <img alt="tests" src="https://img.shields.io/badge/tests-52_passing-54d18a?style=flat-square&labelColor=0a0a0e">
+  <img alt="version" src="https://img.shields.io/badge/version-0.2.0-ECEDF1?style=flat-square&labelColor=0a0a0e">
+  <img alt="tests" src="https://img.shields.io/badge/tests-68_passing-54d18a?style=flat-square&labelColor=0a0a0e">
   <img alt="python" src="https://img.shields.io/badge/python-3.10+-49b6ff?style=flat-square&labelColor=0a0a0e">
 </p>
 
-**A Claude Code session forgets everything the moment it ends.** iris is the layer that remembers — then keeps working. It writes its own handover before context compaction and loads it at the next session start, runs your backlog end to end (implement → verify → commit → repeat), decides for itself when to parallelize, and lets you queue the next ideas mid-run without breaking stride. Plain files. No daemon. No lock-in.
+**A Claude Code session forgets everything the moment it ends.** iris is the layer that remembers — then keeps working. It writes its own handover before context compaction and loads it at the next session start, runs your backlog end to end (implement → verify → commit → repeat), decides for itself when to parallelize, and lets you queue the next ideas mid-run. Flip on `/takeover` and it runs unattended — choosing its own objectives, guided by a second brain that learns how *you* decide. Plain files. No daemon. No lock-in.
 
 ```bash
 git clone https://github.com/sohams25/iris.git ~/Tools/iris
@@ -16,7 +16,7 @@ cd <your-project> && bash ~/Tools/iris/setup.sh
 
 ---
 
-## Three things it does
+## What it does
 
 ### 1 · Memory that survives the session
 
@@ -29,6 +29,10 @@ When context compaction fires — or you run `/rollover` — iris writes a hando
 ### 3 · Plan ahead without stopping it
 
 Jot the next tasks into `docs/next.md` while a run is in flight. The loop folds them into the backlog at the next safe checkpoint — **between tasks, never mid-task** — so your planning and its execution stay in sync without ever colliding.
+
+### 4 · Take its hands off the wheel
+
+`/takeover on` and iris runs unattended — it decides the next objective itself (and invents goals when the backlog runs dry), executes through `/run`, learns from how it went, and loops. It's guided by a **second brain**: a local, private model of your preferences that updates with a reward rule on outcomes and **simulates what you'd choose** at each fork. Experience replay + consolidation keep what it learned about a long project from being forgotten as it picks up new patterns. `/takeover off` is the kill-switch; cycle/time budgets and a full audit trail keep it bounded; verify-before-commit is never skipped.
 
 ```mermaid
 %%{init: {'theme':'base','themeVariables':{'background':'#050506','primaryColor':'#11131d','primaryTextColor':'#ECEDF1','primaryBorderColor':'#5E6AD2','lineColor':'#5E6AD2','textColor':'#9aa1b8','fontFamily':'ui-monospace, monospace','clusterBkg':'#0a0a0e','clusterBorder':'#23253a'}}}%%
@@ -81,6 +85,7 @@ bash ~/Tools/iris/setup.sh        # symlinks .claude/ + scripts/, copies templat
 | Command | Does |
 |---|---|
 | `/run` | Work the backlog: drains `docs/next.md`, auto-routes serial vs parallel, verifies + commits each step |
+| `/takeover [on\|off\|status]` | Hands-off autonomous work, guided by the learning second brain (`off` = kill-switch) |
 | `/status` | Open tasks · current handover · branch · last commits |
 | `/backlog [Tnnn]` | The backlog as a table, or one task by id |
 | `/submit <desc>` | Refine a raw idea into a `T###` entry |
@@ -124,8 +129,8 @@ Copy `integrations/slack/` to `integrations/<name>/`, retarget its sender/receiv
 ```
 iris/
 ├── .claude/
-│   ├── commands/   · 8 slash commands
-│   ├── hooks/      · session-start · pre-compact · block-ai-trailers
+│   ├── commands/   · 9 slash commands
+│   ├── hooks/      · session-start · pre-compact · block-ai-trailers · brain-observe (opt-in)
 │   ├── skills/     · handovers · swarm (parallel engine) · commit-style · karpathy-guidelines
 │   └── settings.json
 ├── scripts/
@@ -133,10 +138,12 @@ iris/
 │   ├── memory.py          · CLI over both memory backends
 │   ├── queue.py           · plan-ahead queue: drains docs/next.md → backlog
 │   ├── build-wave-plan.py · the serial/parallel router (--decide), auto width
+│   ├── brain.py           · the second brain (RL preference model + simulate)
+│   ├── takeover.py        · autonomous-takeover gate (toggle · budgets · kill-switch)
 │   ├── parse-tasks.py · doctor.py (14 checks) · handover-new/validate · migrate-handovers
 │   └── notify.py · detect-verify.sh · slackbot-start.sh
 ├── integrations/  · slack (ships) · discord · webhook (stubs)
-├── tests/         · primitives · hooks · adapters · multi-project · skills · queue · router
+├── tests/         · primitives · hooks · adapters · multi-project · skills · queue · router · brain · takeover
 ├── docs/          · plan.md · next.md · integrations.md · architecture.md
 └── setup.sh · CLAUDE.md · Makefile · pyproject.toml
 ```

@@ -1,7 +1,7 @@
 [project]
 name = "iris-claude-code"
-version = "0.1.0"
-description = "Claude Code-native workflow plugin: persistent memory, backlog-driven execution, swarm, and a connect-to-anything integration layer."
+version = "0.2.0"
+description = "Claude Code-native workflow plugin: persistent memory, a self-running backlog, autonomous takeover, and a learning second brain."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "sohams25", email = "sohams.web@gmail.com" }]

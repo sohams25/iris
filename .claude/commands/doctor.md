@@ -24,7 +24,7 @@ If any check fails, follow up with a one-line suggestion per failing check:
 | `skill symlinks` | Re-create the broken link: `ln -sfn <source> .claude/skills/<name>`. |
 | `CLAUDE.md` | Restore from git history; auto-loaded as project context. |
 | `slack config` | Fill in `.env` from `.env.example` (Slack is optional). |
-| `projects dir` | Create `$PROJECTS_DIR` (default `Tasks/`) or fix the env var. |
+| `projects dir` | Create `$PROJECTS_DIR` (default `Projects/`) or fix the env var. |
 | `verify cmd` | Add `scripts/verify.sh` or set `VERIFY_CMD` env var. |
 | `git` | Run from inside the repo. |
 

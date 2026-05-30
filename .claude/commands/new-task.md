@@ -1,5 +1,5 @@
 ---
-description: Scaffold a new task folder under $PROJECTS_DIR/<N>_<kebab-name>/ (default Tasks/) with a template populated by the latest handover context.
+description: Scaffold a new task folder under $PROJECTS_DIR/<N>_<kebab-name>/ (default Projects/) with a template populated by the latest handover context.
 ---
 
 The user wants to start a new task area. Their input is:
@@ -13,7 +13,7 @@ Do this end-to-end with shell + Edit only:
 
 0. **Resolve the projects directory.** Read `PROJECTS_DIR` from the
    environment; if unset, parse it from `.env` (a line starting
-   `PROJECTS_DIR=...`); if still unset, default to `Tasks`. Treat the
+   `PROJECTS_DIR=...`); if still unset, default to `Projects`. Treat the
    resolved value as a path **relative to the workspace root**. Create
    the directory with `mkdir -p` if it does not exist; the user has
    declared the directory name even if they have not populated it yet.
@@ -94,9 +94,9 @@ Do this end-to-end with shell + Edit only:
 Do NOT commit. Do NOT modify `docs/plan.md`. Do NOT touch the obsidian
 vault. This command only scaffolds the directory.
 
-Note for plugin packaging: the default `PROJECTS_DIR=Tasks` is the
-convention used by *this* workspace. A consumer of the plugin sets the
-variable to whatever name fits their repo (`Projects`, `Work`,
+Note for plugin packaging: the default `PROJECTS_DIR=Projects` is the
+convention iris ships. A consumer sets the variable to whatever name fits
+their repo (`Tasks`, `Work`,
 `Initiatives`, etc.). The variable is the only thing that points at the
 project-area root; the slash command, the README template, and the
 scaffolding logic all read it.

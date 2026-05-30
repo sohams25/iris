@@ -11,7 +11,7 @@ DOCTOR = REPO_ROOT / "scripts" / "doctor.py"
 
 
 def test_doctor_json_well_formed():
-    env = {**os.environ, "MEMORY_BACKEND": "markdown", "PROJECTS_DIR": "Tasks"}
+    env = {**os.environ, "MEMORY_BACKEND": "markdown", "PROJECTS_DIR": "Projects"}
     res = subprocess.run(
         [sys.executable, str(DOCTOR), "--json"],
         cwd=str(REPO_ROOT),

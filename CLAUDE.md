@@ -50,6 +50,8 @@ typing into a terminal at the end of a focused hour."
 | Event log | `.iris-state/events.jsonl` (markdown backend only) |
 | Run lock | `.iris-state/run.lock` (PID of active `claude -p "/run"`) |
 | Queue archive | `.iris-state/queue-archive/` (drained `docs/next.md` snapshots) |
+| Second brain | `.iris-state/second-brain/` (project) + `~/.iris/second-brain/` (global) — gitignored |
+| Takeover state | `.iris-state/takeover/` (mode, budgets, per-cycle audit) |
 
 ## Slash commands
 
@@ -59,6 +61,7 @@ typing into a terminal at the end of a focused hour."
 | `/backlog [Tnnn]` | Full backlog readout, optionally focused on one task |
 | `/submit <description>` | File a new T### into `docs/plan.md` (refines first) |
 | `/run` | Work the backlog — drains `docs/next.md`, auto-routes serial vs parallel, verifies + commits each step |
+| `/takeover [on\|off\|status]` | Hands-off, self-directing work guided by the second brain (kill-switch: `/takeover off`) |
 | `/rollover [title]` | Manual handover checkpoint with carry-forward |
 | `/memory [current\|list\|search\|validate] [...]` | Inspect the memory backend |
 | `/doctor` | Run `scripts/doctor.py` (14 health checks) |
@@ -80,6 +83,22 @@ notes.
 The `PreCompact` hook auto-runs `/rollover` semantics when Claude is
 about to compact context. That's the real context-pressure signal —
 you do not need to guess from iteration counts.
+
+## Autonomous takeover & the second brain
+
+`/takeover on` hands iris the wheel: it decides the next objective itself,
+executes via `/run`, learns from the outcome, and loops — unattended. `off` is
+the kill-switch; cycle/time budgets and a per-cycle audit under
+`.iris-state/takeover/` bound it; verify-before-commit is never skipped.
+
+It is guided by the **second brain** (`scripts/brain.py`) — a local, gitignored,
+reward-driven model of your preferences. It stores *instincts* (confidence-scored
+behaviours distilled from your prompts and iris's decisions), updates them with
+an RL rule on outcomes, and **simulates what you'd choose** at each decision.
+Experience replay + consolidation + decay keep long-term project patterns from
+being forgotten as new ones are learned. The data is personal and never
+committed — project tier under `.iris-state/second-brain/`, global tier under
+`$IRIS_HOME/second-brain/`. Teach it: `brain.py observe | reward | simulate | status`.
 
 ## Coding standards
 
@@ -125,9 +144,11 @@ Iris exposes its conventions as environment variables. Override in `.env`:
 |---|---|---|
 | `MEMORY_BACKEND` | `markdown` | Selects which storage `scripts/memory.py` writes through |
 | `OBSIDIAN_VAULT` | (unset) | Vault root when `MEMORY_BACKEND=obsidian` — must exist |
-| `PROJECTS_DIR` | `Tasks` | Root directory `/new-task` scaffolds into |
+| `PROJECTS_DIR` | `Projects` | Root directory `/new-task` scaffolds into |
 | `PLAN_PATH` | `docs/plan.md` | The execution backlog |
 | `NEXT_PATH` | `docs/next.md` | Plan-ahead queue `/run` drains between tasks (swarm width itself is auto) |
+| `BRAIN_OBSERVE` | `off` | When `on`, `brain-observe.sh` logs prompts for the second brain to distil |
+| `IRIS_HOME` | `~/.iris` | Where the global (cross-project) second-brain tier lives |
 | `CLAUDE_BIN` | `claude` | Override if multiple Claude Code CLIs are installed |
 | `IRIS_STALE_PATH_IGNORE` | (unset) | Colon-separated path prefixes the stale-reference scanner ignores |
 

@@ -6,6 +6,7 @@ This module centralises that logic so every script agrees.
 """
 from __future__ import annotations
 
+import contextlib
 import os
 from pathlib import Path
 
@@ -70,6 +71,43 @@ def next_path() -> Path:
     rel = env_value("NEXT_PATH", "docs/next.md")
     p = Path(rel)
     return p if p.is_absolute() else repo_root() / p
+
+
+def brain_dir() -> Path:
+    """Per-project second-brain store, under the gitignored .iris-state/."""
+    return state_dir() / "second-brain"
+
+
+def global_brain_dir() -> Path:
+    """Cross-project second-brain tier, outside any repo ($IRIS_HOME or ~/.iris)."""
+    home = os.environ.get("IRIS_HOME", "").strip()
+    base = Path(home).expanduser() if home else Path.home() / ".iris"
+    return base / "second-brain"
+
+
+def takeover_dir() -> Path:
+    """Autonomous-takeover state + per-cycle audit (gitignored)."""
+    return state_dir() / "takeover"
+
+
+@contextlib.contextmanager
+def lock(path: Path):
+    """Best-effort exclusive advisory lock on `<path>.lock`. Hold it across a
+    read-modify-write to serialize writers (e.g. the shared global brain tier
+    or the takeover gate). No-op where fcntl is unavailable (non-POSIX)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lk = path.with_suffix(path.suffix + ".lock")
+    try:
+        import fcntl
+    except ImportError:
+        yield
+        return
+    with open(lk, "w") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
 
 
 # scripts/ itself is always iris's own scripts/ (where this helper lives).

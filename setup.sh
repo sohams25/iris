@@ -108,8 +108,8 @@ if [ ! -e "$TARGET/.env" ]; then
 fi
 
 # scaffold the projects dir so /new-task and doctor's projects-dir check are
-# coherent on first run (rename via PROJECTS_DIR in .env; default Tasks)
-PROJECTS_DIR_NAME="${PROJECTS_DIR:-Tasks}"
+# coherent on first run (rename via PROJECTS_DIR in .env; default Projects)
+PROJECTS_DIR_NAME="${PROJECTS_DIR:-Projects}"
 mkdir -p "$TARGET/$PROJECTS_DIR_NAME"
 echo "  mkdir       : $TARGET/$PROJECTS_DIR_NAME/"
 
