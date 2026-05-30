@@ -276,12 +276,18 @@ class ObsidianMemory:
                 "Create the vault (or point OBSIDIAN_VAULT at an existing "
                 "one), or fall back to MEMORY_BACKEND=markdown."
             )
-        # Obsidian vault layout: work/handovers for session checkpoints
-        # (parallel to handovers/ on the markdown backend), and a JSONL
-        # event log under perf/.
-        self.work = self.vault / "work" / "handovers"
+        # Obsidian vault layout: work/handovers/<project>/ for session
+        # checkpoints (parallel to handovers/ on the markdown backend), and a
+        # per-project JSONL event log under perf/. The <project> segment keeps
+        # multiple iris projects that share one vault from cross-contaminating
+        # each other's handover chain. It defaults to the project directory
+        # name ($IRIS_ROOT / cwd basename); override with $IRIS_PROJECT to
+        # disambiguate same-named projects.
+        project = env("IRIS_PROJECT", "").strip() or REPO_ROOT.name
+        self.project = _slugify(project)
+        self.work = self.vault / "work" / "handovers" / self.project
         self.work.mkdir(parents=True, exist_ok=True)
-        self.events = self.vault / "perf" / "workspace-events.jsonl"
+        self.events = self.vault / "perf" / f"{self.project}-events.jsonl"
         self.events.parent.mkdir(parents=True, exist_ok=True)
 
     @staticmethod

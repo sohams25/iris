@@ -70,7 +70,7 @@ link "$IRIS_ROOT/.claude/hooks"     "$TARGET/.claude/hooks"
 link "$IRIS_ROOT/.claude/settings.json" "$TARGET/.claude/settings.json"
 
 mkdir -p "$TARGET/.claude/skills"
-for skill in handovers swarm commit-style; do
+for skill in handovers swarm commit-style karpathy-guidelines; do
     link "$IRIS_ROOT/.claude/skills/$skill" "$TARGET/.claude/skills/$skill"
 done
 

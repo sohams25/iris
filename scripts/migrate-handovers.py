@@ -16,6 +16,7 @@ does not exist. Refuses to clobber a non-empty work/handovers/ unless
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -80,7 +81,21 @@ def main(argv: list[str] | None = None) -> int:
     if not vault.exists():
         print(f"vault does not exist: {vault}", file=sys.stderr)
         return 1
-    work = vault / "work" / "handovers"
+    # Namespace per project so a shared vault keeps each project's handover
+    # chain separate (mirrors ObsidianMemory in scripts/memory.py). Resolve
+    # $IRIS_PROJECT from the environment, then from .env (same precedence the
+    # vault path uses above, and what memory.py's env() does), then fall back
+    # to the project directory name.
+    project = os.environ.get("IRIS_PROJECT", "").strip()
+    if not project:
+        env_file = REPO_ROOT / ".env"
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                if line.strip().startswith("IRIS_PROJECT="):
+                    project = line.partition("=")[2].strip().strip('"').strip("'")
+                    break
+    project = project or REPO_ROOT.name
+    work = vault / "work" / "handovers" / _slugify(project)
     work.mkdir(parents=True, exist_ok=True)
 
     if args.replace:

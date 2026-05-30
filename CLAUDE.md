@@ -92,11 +92,16 @@ Defaults, override in your project:
 
 ## Skills available
 
-Project-local skills under `.claude/skills/`:
+Project-local skills under `.claude/skills/` (4 owned, symlinked into every
+target by `setup.sh`):
 
 - `handovers/` — handover frontmatter contract and writing rules.
 - `swarm/` — parallel-wave execution protocol.
 - `commit-style/` — human-voice commit messages; forbids AI footers.
+- `karpathy-guidelines/` — behavioral coding guidelines (think before coding,
+  simplicity first, surgical changes, goal-driven execution). Vendored from
+  [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills)
+  (MIT), derived from Andrej Karpathy's observations on LLM coding pitfalls.
 
 Optional skills that iris's `setup.sh` can symlink in if you have them
 installed at `~/Tools/`:
