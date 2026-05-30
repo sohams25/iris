@@ -2,11 +2,9 @@
 
 <p>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-5E6AD2?style=flat-square&labelColor=0a0a0e"></a>
-  <img alt="version" src="https://img.shields.io/badge/version-0.3.0-ECEDF1?style=flat-square&labelColor=0a0a0e">
-  <a href="https://github.com/sohams25/iris/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/sohams25/iris/ci.yml?style=flat-square&labelColor=0a0a0e&label=ci"></a>
+  <img alt="version" src="https://img.shields.io/badge/version-0.1.0-ECEDF1?style=flat-square&labelColor=0a0a0e">
   <img alt="tests" src="https://img.shields.io/badge/tests-52_passing-54d18a?style=flat-square&labelColor=0a0a0e">
   <img alt="python" src="https://img.shields.io/badge/python-3.10+-49b6ff?style=flat-square&labelColor=0a0a0e">
-  <img alt="built for Claude Code" src="https://img.shields.io/badge/built_for-Claude_Code-d97757?style=flat-square&labelColor=0a0a0e">
 </p>
 
 **A Claude Code session forgets everything the moment it ends.** iris is the layer that remembers — then keeps working. It writes its own handover before context compaction and loads it at the next session start, runs your backlog end to end (implement → verify → commit → repeat), decides for itself when to parallelize, and lets you queue the next ideas mid-run without breaking stride. Plain files. No daemon. No lock-in.

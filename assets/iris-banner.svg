@@ -17,7 +17,7 @@
   <rect x="1" y="1" width="1198" height="334" rx="18" fill="url(#aura)"/>
 
   <rect x="1042" y="30" width="122" height="34" rx="17" fill="none" stroke="#ffffff" stroke-opacity="0.14"/>
-  <text x="1103" y="52" text-anchor="middle" font-family="ui-monospace, 'JetBrains Mono', Menlo, monospace" font-size="15" letter-spacing="1" fill="#8b93e8">v0.3.0</text>
+  <text x="1103" y="52" text-anchor="middle" font-family="ui-monospace, 'JetBrains Mono', Menlo, monospace" font-size="15" letter-spacing="1" fill="#8b93e8">v0.1.0</text>
 
   <circle cx="980" cy="168" r="86" fill="url(#pupil)"/>
   <circle cx="980" cy="168" r="78" fill="none" stroke="#5E6AD2" stroke-opacity="0.22" stroke-width="1.4"/>
