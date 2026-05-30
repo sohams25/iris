@@ -1,0 +1,47 @@
+[project]
+name = "iris-claude-code"
+version = "0.1.0"
+description = "Claude Code-native workflow plugin: persistent memory, backlog-driven execution, swarm, and a connect-to-anything integration layer."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "sohams25", email = "sohams.web@gmail.com" }]
+requires-python = ">=3.10"
+keywords = ["claude-code", "claude", "anthropic", "agent", "workflow", "plugin"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+slack = ["slack-bolt>=1.18", "slack-sdk>=3.26"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.5"]
+
+[project.urls]
+Homepage = "https://github.com/sohams25/iris"
+Source = "https://github.com/sohams25/iris"
+Issues = "https://github.com/sohams25/iris/issues"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["integrations*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

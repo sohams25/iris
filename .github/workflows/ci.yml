@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check scripts/ integrations/ tests/
+      - name: Test
+        run: pytest tests/ -v
+      - name: Doctor (informational — markdown backend, no Slack)
+        env:
+          MEMORY_BACKEND: markdown
+          PROJECTS_DIR: Tasks
+        run: |
+          mkdir -p Tasks
+          python3 scripts/doctor.py || true
+      - name: Verify no AI footers in commit messages
+        run: |
+          if git log --pretty=%B origin/main..HEAD 2>/dev/null \
+             | grep -iE '🤖|generated with claude|co-authored-by:.*(claude|noreply@anthropic)'; then
+            echo "AI footer detected in commit message" >&2
+            exit 1
+          fi

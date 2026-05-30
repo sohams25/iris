@@ -1,0 +1,3 @@
+# Default $PROJECTS_DIR. /new-task scaffolds <N>_<name>/ folders here.
+# Rename via PROJECTS_DIR in .env (e.g. Projects, Work). Kept in git so a
+# fresh clone passes `doctor`'s projects-dir check.

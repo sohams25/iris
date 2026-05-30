@@ -1,0 +1,6 @@
+# iris core dependencies. Pinned to ranges that have been tested.
+PyYAML>=6.0
+
+# Slack adapter only — install if you enable integrations/slack/.
+slack-bolt>=1.18 ; extra == "slack"
+slack-sdk>=3.26 ; extra == "slack"

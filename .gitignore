@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node (if a consumer uses iris in a JS repo)
+node_modules/
+*.log
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+.secrets
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Iris runtime
+.iris-state/
+.swarm-locks.json
+.loop-state/
+
+# Markdown-backend handovers — gitignored by default since they're
+# session-local. A consumer who wants them committed can remove this.
+handovers/
+
+# Misc
+*.pid
+*.pid.lock
