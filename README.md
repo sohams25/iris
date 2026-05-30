@@ -11,7 +11,7 @@ connect-to-anything integration layer.
 │                                                                 │
 │  ┌────────────────┐    ┌─────────────────┐    ┌──────────────┐  │
 │  │ slash commands │ →  │ scripts/*.py    │ →  │ memory       │  │
-│  │ .claude/cmds/  │    │ (memory, plan,  │    │ markdown │    │  │
+│  │ .claude/cmds/  │    │ (memory, plan,  │    │ markdown │   │ │
 │  └────────────────┘    │  doctor, swarm) │    │ obsidian     │  │
 │  ┌────────────────┐    └─────────────────┘    └──────────────┘  │
 │  │ hooks          │           ↑                       ↑         │
