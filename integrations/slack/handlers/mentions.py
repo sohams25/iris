@@ -103,13 +103,13 @@ def _format_swarm() -> str:
     if not waves:
         return "_No open tasks to plan._"
     lines = [
-        f"*Swarm wave plan* — {stats.get('total_tasks')} tasks · {stats.get('wave_count')} waves"
+        f"*Wave plan* — {stats.get('total_tasks')} tasks · {stats.get('wave_count')} waves"
     ]
     for w in waves:
         ids = ", ".join(f"`{t['id']}`" for t in w["tasks"])
         kind = "parallel" if len(w["tasks"]) > 1 else "serial"
         lines.append(f"• *Wave {w['id']}* ({kind}): {ids}")
-    lines.append("\n_Actual execution still happens inside Claude Code: type `/swarm` in a session there._")
+    lines.append("\n_Actual execution still happens inside Claude Code: type `/run` in a session there — it auto-routes to parallel when the work allows._")
     return "\n".join(lines)
 
 

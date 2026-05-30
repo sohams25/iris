@@ -1,59 +1,78 @@
 ---
-description: Work the backlog in docs/plan.md serially — one task at a time, verify between.
+description: Work the backlog — drains your plan-ahead queue, then auto-routes serial or parallel.
 ---
 
-Work the open backlog at `docs/plan.md` serially until empty or the user stops you.
+Work the open backlog at `docs/plan.md` until it's empty or the user stops you.
+`/run` is the single entry point: it picks **serial** or **parallel** execution
+itself, and it ingests anything you queue mid-run from `docs/next.md`.
 
-Optional arguments via `$ARGUMENTS`: `max_iterations=N`, `max_minutes=M`, `dry_run=true`. Parse them yourself; defaults are 50 / 480 / false.
+Optional `$ARGUMENTS`: `max_iterations=N`, `max_minutes=M`, `dry_run=true`
+(defaults 50 / 480 / false). Parse them yourself.
 
-For parallel execution within a wave, use `/swarm` instead — that invokes the existing `swarm` skill which spawns Agent-tool subagents per wave. This command is the **supervised serial loop**.
-
-## Loop body
-
-Cache the verify command at the top of the loop:
+## 0. Setup (once, at the top)
 
 ```bash
-bash scripts/detect-verify.sh
+python3 scripts/queue.py drain          # ingest anything already queued in docs/next.md
+bash scripts/detect-verify.sh           # cache the verify command ($VERIFY_CMD)
+python3 scripts/build-wave-plan.py --decide
 ```
 
-Then for each iteration:
+The `--decide` JSON gives `mode` (`serial`|`parallel`), a `reason`, the
+auto-derived `width`, and the `waves`. **Honor it**, with one override: if
+`detect-verify.sh` returned the fallback (`no verify command…`), force
+**serial** — running parallel blind is worse than running serially (warn the
+user once).
 
-1. **Pick the next task:** `python3 scripts/parse-tasks.py next` returns JSON of the next open, unblocked task in priority order. If output is empty, you're done — print `backlog empty` and stop.
+- **mode = parallel** → go to **§2 Parallel**.
+- **mode = serial** → go to **§1 Serial**.
 
-2. **Announce it:** show id, title, files. If `--dry-run` mode (the `dry_run=true` arg), mark passes and skip steps 3-6.
+## 1. Serial loop
 
-3. **Implement it yourself** using Read, Edit, Write, Bash. Stay within the declared `files:` list when one exists. Do NOT modify `docs/plan.md` during implementation.
+For each iteration:
 
-4. **Run verify:** `bash -c "$VERIFY_CMD"`. Capture stdout+stderr (last 4 KB).
+1. **Drain the plan-ahead queue** — `python3 scripts/queue.py drain`. This is
+   the sync point: tasks you saved into `docs/next.md` while the previous task
+   ran are folded into the backlog now, between tasks, never mid-task.
+2. **Pick the next task:** `python3 scripts/parse-tasks.py next` → JSON of the
+   next open, unblocked task by priority. Empty output → print `backlog empty`
+   and stop.
+3. **Announce** id, title, files. If `dry_run=true`, mark passes and skip 4-7.
+4. **Implement it yourself** (Read/Edit/Write/Bash). Stay within the declared
+   `files:` when present. Do NOT modify `docs/plan.md` during implementation.
+5. **Verify:** `bash -c "$VERIFY_CMD"`; capture stdout+stderr (last 4 KB).
+6. **On green:** `parse-tasks.py mark <id> passes true`; author a commit
+   (invoke the `commit-style` skill first; scaffold `feat(<id>): <terse
+   outcome>`); `git add -A && git commit -F <msg>` (skip if no changes);
+   `bash scripts/notify-slack.sh "<id> passed" "<title>" || true`.
+7. **On red — retry up to 2×** by re-reading the verify tail and fixing. Still
+   red → `parse-tasks.py mark <id> blocked true`; `parse-tasks.py note <id>
+   "blocked by verify; tail: <last 400 chars>"`; Slack-notify.
+8. **Loop.** Re-evaluate `build-wave-plan.py --decide` every few tasks — if the
+   queue brought in enough disjoint work, it may now say `parallel`; you may
+   switch to §2 for the remaining backlog.
 
-5. **On green:**
-   - `python3 scripts/parse-tasks.py mark <id> passes true`
-   - Author a commit. Invoke the `commit-style` skill first to set the
-     voice and trailer rules; default scaffold is
-     `feat(<id>): <terse outcome>` with a 1-3 line body explaining the
-     why if the change is more than mechanical.
-   - `git add -A && git commit -F <message-file>` (skip if no changes).
-   - `bash scripts/notify-slack.sh "<id> passed" "<title>" || true`
+## 2. Parallel waves
 
-6. **On red — retry up to 2 times** by re-reading the verify output and fixing. If still red:
-   - `python3 scripts/parse-tasks.py mark <id> blocked true`
-   - `python3 scripts/parse-tasks.py note <id> "blocked by verify; tail: <last 400 chars>"`
-   - `bash scripts/notify-slack.sh "<id> blocked" "<reason>" || true`
-
-7. **Loop.**
+Drain the queue first (`python3 scripts/queue.py drain`), then invoke the
+`swarm` skill (Skill tool, `skill: "swarm"`). It re-runs `build-wave-plan.py`
+on the freshly-drained backlog (already width-capped to the auto ceiling),
+shows the wave plan, launches each wave's tasks as parallel Agent-tool
+subagents, verifies and commits per wave, and drains the queue between waves.
+The swarm skill is the parallel engine; `/run` is its only caller now.
 
 ## Stop conditions (any one)
 
-- Backlog empty.
-- Iteration count exceeds `max_iterations` (default 50).
-- Wall-clock minutes exceeds `max_minutes` (default 480).
-- 3 consecutive iterations with no new commit (circuit breaker).
+- Backlog empty (and `docs/next.md` empty).
+- Iterations > `max_iterations` (default 50).
+- Wall-clock > `max_minutes` (default 480).
+- 3 consecutive iterations / waves with no new commit (circuit breaker).
 - User says stop.
-- PreCompact hook fires (it will write a fresh handover; next session picks up from it).
+- PreCompact hook fires (it writes a fresh handover; the next session resumes).
 
 ## Rules
 
-- Do NOT skip verify between tasks.
-- Do NOT skip committing on green — the loop's state lives in git history.
-- Do NOT continue past 3 stagnant iterations; abort and Slack-notify.
-- If the verify command is the fallback (`echo 'no verify command…'`), warn the user once at the top of the loop. Tasks will appear to pass automatically — that's intentional but may not be what you want.
+- Never skip verify between tasks/waves. Never skip committing on green — the
+  loop's state lives in git history.
+- Never spawn two agents editing the same file in one wave (the wave builder
+  prevents this; don't override).
+- Never continue past 3 stagnant iterations; abort and Slack-notify.

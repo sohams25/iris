@@ -33,6 +33,6 @@ echo "<handover id=\"$CURRENT\">"
 python3 scripts/memory.py current 2>/dev/null || echo "_(failed to read handover body)_"
 echo "</handover>"
 echo ""
-echo "Use \`/status\` for a one-screen snapshot. Use \`/run\` to start working the backlog. Use \`/swarm\` to fan out."
+echo "Use \`/status\` for a one-screen snapshot. Use \`/run\` to start working the backlog — it auto-routes serial or parallel."
 
 exit 0

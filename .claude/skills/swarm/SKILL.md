@@ -1,25 +1,26 @@
 ---
 name: swarm
-description: Parallel multi-agent task execution. Reads docs/plan.md, builds a dependency graph by file overlap, and runs file-disjoint tasks in parallel waves via the Agent tool. Use when the user types /swarm or asks to execute backlog tasks in parallel.
+description: Parallel multi-agent task execution — the engine /run invokes when it routes to parallel. Reads docs/plan.md, builds a dependency graph by file overlap, and runs file-disjoint tasks in parallel waves via the Agent tool.
 ---
 
-# /swarm — Parallel Task Orchestrator
+# swarm — parallel execution engine
 
-This skill turns a flat task backlog into parallel agent execution. Where
-the autonomous loop in `scripts/autonomous-loop.sh` runs tasks **serially**
-(one Claude session at a time), `/swarm` runs **file-disjoint tasks in
-parallel waves** using the `Agent` tool.
+This skill turns a flat task backlog into parallel agent execution. It is the
+parallel engine `/run` invokes when `build-wave-plan.py --decide` routes to
+parallel — **not** a user-facing slash command. Where `/run`'s serial loop
+works one task at a time, the swarm runs **file-disjoint tasks in parallel
+waves** using the `Agent` tool.
 
-## When to invoke
+## When invoked
 
-- User types `/swarm` (with optional path argument).
-- User asks "run all the backlog tasks", "execute the plan in parallel",
-  "fan these tasks out", or similar.
+`/run` invokes this skill (Skill tool, `skill: "swarm"`) after it drains the
+queue and `build-wave-plan.py --decide` returns `mode: parallel`. You are the
+orchestrator for that parallel run.
 
 ## Inputs
 
 - Default backlog: `docs/plan.md` (YAML front-matter with `tasks:` list).
-- Override path: `/swarm path/to/other-plan.md`.
+- `/run` may pass an alternate plan path through to this skill.
 
 ## Execution protocol
 
@@ -108,9 +109,11 @@ After all agents in the wave return, run the verify command from step 2.
   revert ONLY that task's files (`git checkout HEAD~<n> -- <files>`),
   and re-run verify. Repeat until verify passes or the wave is abandoned.
 
-### 6. Release locks and advance
+### 6. Release locks, drain the queue, advance
 
-Delete `.swarm-locks.json` and proceed to the next wave. Repeat steps 3–5.
+Delete `.swarm-locks.json`, then `python3 scripts/queue.py drain` so anything
+you queued into `docs/next.md` during the wave joins the backlog before the
+next wave is planned. Proceed to the next wave; repeat steps 3–5.
 
 ### 7. Final report
 
@@ -146,9 +149,9 @@ Print short progress lines as you go:
 [swarm] complete: 5 passed, 0 blocked, 12m 04s
 ```
 
-## Differences vs autonomous-loop.sh
+## Differences — serial /run vs parallel swarm
 
-| Aspect | Loop | Swarm |
+| Aspect | Serial /run | Swarm |
 |---|---|---|
 | Concurrency | Serial | Parallel within waves |
 | Best for | Overnight unattended runs | Interactive sessions where you can supervise |

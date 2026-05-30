@@ -21,8 +21,10 @@ If any check fails, follow up with a one-line suggestion per failing check:
 | `hooks` | `ls -la .claude/hooks/` then `chmod +x .claude/hooks/*.sh`. |
 | `settings.json` | `python3 -c "import json; json.load(open('.claude/settings.json'))"` to find the parse error. |
 | `slash commands` | Restore the missing markdown files from git history. |
+| `skill symlinks` | Re-create the broken link: `ln -sfn <source> .claude/skills/<name>`. |
 | `CLAUDE.md` | Restore from git history; auto-loaded as project context. |
-| `slack config` | Fill in `.env` from `.env.example`. |
+| `slack config` | Fill in `.env` from `.env.example` (Slack is optional). |
+| `projects dir` | Create `$PROJECTS_DIR` (default `Tasks/`) or fix the env var. |
 | `verify cmd` | Add `scripts/verify.sh` or set `VERIFY_CMD` env var. |
 | `git` | Run from inside the repo. |
 

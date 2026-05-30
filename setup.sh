@@ -98,6 +98,10 @@ if [ ! -e "$TARGET/docs/plan.md" ]; then
     cp "$IRIS_ROOT/docs/plan.md" "$TARGET/docs/plan.md"
     echo "  copy        : $TARGET/docs/plan.md"
 fi
+if [ ! -e "$TARGET/docs/next.md" ]; then
+    cp "$IRIS_ROOT/docs/next.md" "$TARGET/docs/next.md"
+    echo "  copy        : $TARGET/docs/next.md  (plan-ahead queue)"
+fi
 if [ ! -e "$TARGET/.env" ]; then
     cp "$IRIS_ROOT/.env.example" "$TARGET/.env"
     echo "  copy        : $TARGET/.env  (edit before first use)"

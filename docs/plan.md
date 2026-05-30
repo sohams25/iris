@@ -8,9 +8,8 @@
 #   passed     — verify command returned 0; commit landed
 #   skipped    — explicitly marked won't-fix or out-of-scope
 #
-# The serial loop (/run) picks the lowest-id open task whose blocked_by
-# is clear. The swarm loop (/swarm) groups file-disjoint open tasks
-# into parallel waves.
+# /run picks the lowest-id open task whose blocked_by is clear, and
+# auto-routes to parallel waves when open tasks are file-disjoint.
 
 tasks:
   - id: T001
@@ -31,8 +30,8 @@ tasks:
     files:
       - "<another/file/this/task/touches>"
     notes: |
-      Tasks that share a `files` entry will be serialized by /swarm.
-      Tasks with no overlap can run in the same wave.
+      Tasks that share a `files` entry are serialized; tasks with no
+      overlap can run together in the same parallel wave.
 ---
 
 # Backlog notes

@@ -5,9 +5,9 @@ project four things that don't exist out of the box:
 
 1. **Persistent memory across sessions** — handovers written by Claude
    itself, loaded automatically at session start.
-2. **A backlog-driven execution loop** — `/run` works `docs/plan.md`
-   serially; `/swarm` fans the same backlog out in parallel waves via
-   the Agent tool.
+2. **A self-routing execution loop** — `/run` works `docs/plan.md`,
+   deciding serial vs parallel waves itself from the backlog's shape, and
+   ingesting tasks you queue mid-run from `docs/next.md`.
 3. **Hooks for the moments that matter** — `SessionStart` (auto-load
    the current handover), `PreCompact` (snapshot before context
    compaction), `PreToolUse(Bash)` (block AI-trailer commit messages).
@@ -39,6 +39,7 @@ typing into a terminal at the end of a focused hour."
 | Concern | Path |
 |---|---|
 | Backlog | `docs/plan.md` (YAML front-matter + prose) |
+| Plan-ahead queue | `docs/next.md` (jot future tasks; `/run` drains it between tasks) |
 | Handovers (obsidian) | `$OBSIDIAN_VAULT/work/handovers/` if `MEMORY_BACKEND=obsidian` |
 | Handovers (markdown fallback) | `handovers/handover_NNN.md` if `MEMORY_BACKEND=markdown` |
 | Slash commands | `.claude/commands/*.md` |
@@ -48,6 +49,7 @@ typing into a terminal at the end of a focused hour."
 | Integration adapters | `integrations/<name>/` (slack ships, discord+webhook stubbed) |
 | Event log | `.iris-state/events.jsonl` (markdown backend only) |
 | Run lock | `.iris-state/run.lock` (PID of active `claude -p "/run"`) |
+| Queue archive | `.iris-state/queue-archive/` (drained `docs/next.md` snapshots) |
 
 ## Slash commands
 
@@ -56,8 +58,7 @@ typing into a terminal at the end of a focused hour."
 | `/status` | Snapshot: backlog counts, current handover, branch, last commits |
 | `/backlog [Tnnn]` | Full backlog readout, optionally focused on one task |
 | `/submit <description>` | File a new T### into `docs/plan.md` (refines first) |
-| `/run` | Serial loop: next task → implement → verify → commit → loop |
-| `/swarm [plan.md]` | Parallel-wave execution via the Agent tool. File-disjoint tasks only |
+| `/run` | Work the backlog — drains `docs/next.md`, auto-routes serial vs parallel, verifies + commits each step |
 | `/rollover [title]` | Manual handover checkpoint with carry-forward |
 | `/memory [current\|list\|search\|validate] [...]` | Inspect the memory backend |
 | `/doctor` | Run `scripts/doctor.py` (14 health checks) |
@@ -125,9 +126,25 @@ Iris exposes its conventions as environment variables. Override in `.env`:
 | `MEMORY_BACKEND` | `markdown` | Selects which storage `scripts/memory.py` writes through |
 | `OBSIDIAN_VAULT` | (unset) | Vault root when `MEMORY_BACKEND=obsidian` — must exist |
 | `PROJECTS_DIR` | `Tasks` | Root directory `/new-task` scaffolds into |
-| `PLAN_PATH` | `docs/plan.md` | The serial-execution backlog |
+| `PLAN_PATH` | `docs/plan.md` | The execution backlog |
+| `NEXT_PATH` | `docs/next.md` | Plan-ahead queue `/run` drains between tasks (swarm width itself is auto) |
 | `CLAUDE_BIN` | `claude` | Override if multiple Claude Code CLIs are installed |
 | `IRIS_STALE_PATH_IGNORE` | (unset) | Colon-separated path prefixes the stale-reference scanner ignores |
+
+## Self-marketing & design
+
+When polishing iris's *own* public face — the `README.md`, the `assets/`
+banner, release notes, launch copy — these global skills apply. They are not
+part of iris's product surface and are deliberately kept out of the README:
+
+- `frontend-design`, `ui-ux-pro-max`, `banner-design` — visual direction,
+  palette + typography intelligence, banner art.
+- the marketing collections — `copywriting`, `product-marketing`, `launch`,
+  `programmatic-seo`, `seo-audit`, `reddit-marketing`, `thread-writer`, … —
+  for positioning, README / launch copy, and distribution.
+
+Use them when working on iris's branding. Keep the README about what iris
+does, never about how it was marketed.
 
 ## When something is unclear
 

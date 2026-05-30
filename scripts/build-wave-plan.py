@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a wave execution plan from docs/plan.md for the /swarm command.
+"""Build a wave execution plan from docs/plan.md for /run's router (--decide) and the swarm skill.
 
 A "wave" is a set of tasks that can execute concurrently because none of
 them share files. The output is a JSON document the orchestrator reads to
@@ -25,7 +25,9 @@ Output schema (printed to stdout as JSON):
 """
 from __future__ import annotations
 
+import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -96,15 +98,54 @@ def build_waves(tasks: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
     return waves
 
 
-def main() -> int:
+def wave_ceiling() -> int:
+    """Auto-derived max agents per wave. The work decides the natural
+    parallelism (the size of a file-disjoint wave); this ceiling only guards
+    against runaway fan-out and scales with the machine. No manual config."""
+    return max(2, min((os.cpu_count() or 4) - 1, 8))
+
+
+def cap_waves(waves: list[list[dict[str, Any]]], width: int) -> list[list[dict[str, Any]]]:
+    """Split any wave wider than `width` into width-sized sub-waves. Tasks in a
+    wave are already file-disjoint, so any subset is a valid parallel batch."""
+    capped: list[list[dict[str, Any]]] = []
+    for w in waves:
+        for i in range(0, len(w), width):
+            capped.append(w[i:i + width])
+    return capped
+
+
+def decide(waves: list[list[dict[str, Any]]], total: int, width: int) -> dict[str, str]:
+    """Recommend serial vs parallel from the (already ceiling-capped) waves."""
+    max_wave = max((len(w) for w in waves), default=0)
+    if total <= 1:
+        return {"mode": "serial", "reason": f"{total} open task(s) — nothing to parallelize"}
+    if max_wave >= 2:
+        return {"mode": "parallel", "reason": (
+            f"{total} open tasks include a file-disjoint wave of {max_wave} "
+            f"(auto ceiling {width}) — run in parallel waves")}
+    return {"mode": "serial", "reason": "every task shares files or is exclusive — no safe parallel wave"}
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="build-wave-plan.py")
+    ap.add_argument("--decide", action="store_true",
+                    help="emit a serial/parallel routing decision, not just the waves")
+    args = ap.parse_args(argv)
+
+    width = wave_ceiling()
     tasks = load_tasks()
-    waves = build_waves(tasks)
-    out = {
-        "waves": [
-            {"id": i + 1, "tasks": w} for i, w in enumerate(waves)
-        ],
-        "stats": {"total_tasks": len(tasks), "wave_count": len(waves)},
+    waves = cap_waves(build_waves(tasks), width)
+    wave_objs = [{"id": i + 1, "tasks": w} for i, w in enumerate(waves)]
+    stats = {
+        "total_tasks": len(tasks),
+        "wave_count": len(waves),
+        "max_wave_size": max((len(w) for w in waves), default=0),
     }
+    if args.decide:
+        out = {**decide(waves, len(tasks), width), "width": width, "stats": stats, "waves": wave_objs}
+    else:
+        out = {"waves": wave_objs, "stats": stats}
     print(json.dumps(out, indent=2))
     return 0
 

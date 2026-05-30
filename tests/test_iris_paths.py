@@ -59,3 +59,30 @@ def test_plan_path_honors_absolute_env(tmp_path, monkeypatch):
     abs_plan = tmp_path / "elsewhere" / "p.md"
     monkeypatch.setenv("PLAN_PATH", str(abs_plan))
     assert _iris_paths.plan_path() == abs_plan
+
+
+def test_env_value_handles_export_and_inline_comments(tmp_path, monkeypatch):
+    monkeypatch.setenv("IRIS_ROOT", str(tmp_path))
+    for k in ("PATHY", "WIDGET", "QUOTED"):
+        monkeypatch.delenv(k, raising=False)
+    (tmp_path / ".env").write_text(
+        "export PATHY=docs/q.md   # trailing comment\n"
+        "WIDGET=7\n"
+        'QUOTED="a # b"\n'
+    )
+    assert _iris_paths.env_value("PATHY") == "docs/q.md"   # export + comment stripped
+    assert _iris_paths.env_value("WIDGET") == "7"
+    assert _iris_paths.env_value("QUOTED") == "a # b"       # '#' inside quotes preserved
+
+
+def test_env_value_env_overrides_dotenv(tmp_path, monkeypatch):
+    monkeypatch.setenv("IRIS_ROOT", str(tmp_path))
+    (tmp_path / ".env").write_text("FOO=from_dotenv\n")
+    monkeypatch.setenv("FOO", "from_env")
+    assert _iris_paths.env_value("FOO") == "from_env"
+
+
+def test_env_value_default_when_missing(tmp_path, monkeypatch):
+    monkeypatch.setenv("IRIS_ROOT", str(tmp_path))
+    monkeypatch.delenv("NOPE", raising=False)
+    assert _iris_paths.env_value("NOPE", "fallback") == "fallback"
