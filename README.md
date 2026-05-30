@@ -1,264 +1,173 @@
-<div align="center">
-
-<img src="assets/iris-banner.svg" alt="iris — Claude Code-native workflow plugin" width="820">
+<img src="assets/iris-banner.svg" alt="iris — the messenger layer for Claude Code" width="100%">
 
 <p>
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <img alt="version" src="https://img.shields.io/badge/version-0.2.0-6a7bff">
-  <img alt="tests" src="https://img.shields.io/badge/tests-38%20passing-54d18a">
-  <img alt="python" src="https://img.shields.io/badge/python-3.10%2B-ffd24b">
-  <img alt="lint: ruff" src="https://img.shields.io/badge/lint-ruff-30173d">
-  <a href="https://github.com/sohams25/iris/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/sohams25/iris/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="built for Claude Code" src="https://img.shields.io/badge/built%20for-Claude%20Code-d97757">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-5E6AD2?style=flat-square&labelColor=0a0a0e"></a>
+  <img alt="version" src="https://img.shields.io/badge/version-0.2.0-ECEDF1?style=flat-square&labelColor=0a0a0e">
+  <a href="https://github.com/sohams25/iris/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/sohams25/iris/ci.yml?style=flat-square&labelColor=0a0a0e&label=ci"></a>
+  <img alt="tests" src="https://img.shields.io/badge/tests-38_passing-54d18a?style=flat-square&labelColor=0a0a0e">
+  <img alt="python" src="https://img.shields.io/badge/python-3.10+-49b6ff?style=flat-square&labelColor=0a0a0e">
+  <img alt="built for Claude Code" src="https://img.shields.io/badge/built_for-Claude_Code-d97757?style=flat-square&labelColor=0a0a0e">
 </p>
 
-<strong>Persistent memory, backlog-driven execution, parallel swarms, and a connect-to-anything integration layer — dropped into any Claude Code project.</strong>
+A Claude Code session forgets everything when it ends. **iris is the layer that remembers** — and the one that connects the session to your backlog, your terminal, and your team's chat. Drop it into any project: persistent memory across sessions, a backlog-driven execution loop, parallel swarm waves, and a connect-to-anything integration shape. No daemon. Plain files you can grep.
 
-<sub><a href="#quickstart">Quickstart</a> · <a href="#commands">Commands</a> · <a href="#memory-backends">Memory</a> · <a href="#work-many-projects-at-once">Multi-project</a> · <a href="#integrations--the-connect-to-anything-model">Integrations</a> · <a href="#skills">Skills</a></sub>
-
-</div>
+```bash
+git clone https://github.com/sohams25/iris.git ~/Tools/iris
+cd <your-project> && bash ~/Tools/iris/setup.sh
+```
 
 ---
-
-iris is the connective tissue between a Claude Code session and everything
-around it — your past sessions, your backlog, your terminal, your team's
-chat. Slash commands drive the work, hooks load and save context
-automatically, and a small set of dependency-free Python scripts do the
-deterministic parts. No daemon. No lock-in. Plain files you can grep.
 
 ## Architecture
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'background':'#050506','primaryColor':'#11131d','primaryTextColor':'#ECEDF1','primaryBorderColor':'#5E6AD2','secondaryColor':'#0d0e16','tertiaryColor':'#0d0e16','lineColor':'#5E6AD2','textColor':'#9aa1b8','fontFamily':'ui-monospace, monospace','clusterBkg':'#0a0a0e','clusterBorder':'#23253a'}}}%%
 flowchart LR
-    subgraph session["Claude Code session"]
+    subgraph session[" Claude Code session "]
         cmds["slash commands"]
         hooks["hooks"]
         skills["skills"]
     end
-    cmds --> scripts
-    hooks --> scripts
-    skills --> scripts
-    scripts["scripts/*.py<br/>memory · parse-tasks · doctor · build-wave"]
-    scripts --> mem[("memory<br/>markdown / obsidian")]
-    scripts --> plan["docs/plan.md<br/>YAML backlog"]
-    adapters["integrations/&lt;adapter&gt;<br/>slack · discord · webhook"] --> scripts
+    cmds --> core
+    hooks --> core
+    skills --> core
+    core["scripts · memory · parse-tasks<br/>doctor · build-wave"]
+    core --> mem[("memory<br/>markdown / obsidian")]
+    core --> plan["docs/plan.md"]
+    adapters["integrations<br/>slack · discord · webhook"] --> core
 ```
 
-## What it gives you
+## What you get
 
-| Feature | How |
+| | |
 |---|---|
-| **Memory across sessions** | A handover file is written automatically when context compaction fires. The `SessionStart` hook loads the current handover at the top of every new session. |
-| **Backlog-driven execution** | `docs/plan.md` is YAML-front-matter. `/run` works it serially (one task → verify → commit → loop). `/swarm` fans file-disjoint tasks across parallel Agent-tool waves. |
-| **Commit-message guard** | A `PreToolUse(Bash)` hook blocks `git commit` messages containing `🤖 Generated with Claude Code`, `Co-Authored-By: Claude`, and similar AI footers. Backed by a `commit-style` skill that documents the voice. |
-| **Multi-project by default** | Every script roots its state at the project you're in. Run iris in as many repos as you like, simultaneously — handovers, locks, and backlogs never cross. |
-| **Connect-to-anything** | An adapter shape under `integrations/<name>/`. Slack ships as the reference adapter. Discord, webhook, and email are documented stubs. |
-| **Doctor** | `scripts/doctor.py` runs 14 health checks (CLI present, plan valid, hooks executable, settings.json valid, skill symlinks resolve, etc.) and exits 0/1 — wireable to CI. |
-
-## Quickstart
-
-iris lives alongside an existing Claude Code project. Pick the project you
-want to add it to.
-
-```bash
-git clone https://github.com/sohams25/iris.git ~/Tools/iris
-cd <your-project>
-bash ~/Tools/iris/setup.sh
-```
-
-`setup.sh` does this:
-
-1. Symlinks `.claude/{commands,hooks,skills}/` and `scripts/` into your
-   project. The plugin surface is owned by iris; your project owns its own
-   `CLAUDE.md` and `docs/plan.md` (templates copied if missing).
-2. Generates `.env` from `.env.example` and scaffolds `$PROJECTS_DIR/`.
-3. Offers to install [superpowers](https://github.com/obra/superpowers) and
-   [stop-slop](https://github.com/hardikpandya/stop-slop) as `~/Tools/<name>/`
-   clones and symlink their skills in.
-4. Runs `python3 scripts/doctor.py` and prints the verdict.
-
-Open a Claude Code session in the project; `/status` confirms the install.
-
-## How a session flows
-
-```mermaid
-sequenceDiagram
-    participant U as You
-    participant CC as Claude Code
-    participant Hook as hooks
-    participant Mem as memory
-    CC->>Hook: SessionStart
-    Hook->>Mem: memory current
-    Mem-->>CC: inject current handover
-    U->>CC: work the backlog (/run, /swarm)
-    Note over CC: context fills up
-    CC->>Hook: PreCompact
-    Hook->>Mem: write next handover (carry-forward)
-    Mem-->>CC: continuity preserved into the next session
-```
+| **Memory across sessions** | A handover is written automatically when context compaction fires; `SessionStart` injects it at the top of the next session. Continuity without copy-paste. |
+| **Backlog-driven execution** | `docs/plan.md` is a YAML backlog. `/run` works it serially — task → verify → commit → loop. `/swarm` fans file-disjoint tasks across parallel agent waves. |
+| **Commit-message guard** | A `PreToolUse` hook hard-blocks `git commit` bodies carrying `🤖 Generated with Claude Code` / `Co-Authored-By: Claude` and similar. Your history stays human. |
+| **Multi-project by default** | Every script roots its state at the project you're in. Run iris in a dozen repos at once — handovers, locks, and backlogs never cross. |
+| **Connect to anything** | One adapter shape under `integrations/<name>/`. Slack ships; Discord, webhook, and email are documented stubs. |
+| **Doctor** | 14 health checks (CLI, plan, hooks, settings, skill symlinks…) with a 0/1 exit — wire it into CI. |
 
 ## Commands
 
-| Command | What it does |
+| Command | Does |
 |---|---|
-| `/status` | Snapshot: open tasks, current handover, branch, last commits |
-| `/backlog [Tnnn]` | Full backlog table; optionally one task by id |
-| `/submit <desc>` | Refine a raw description into a `T###` entry in `docs/plan.md` |
-| `/run` | Serial loop: next task → implement → verify → commit → loop |
-| `/swarm` | Parallel-wave execution via the Agent tool (file-disjoint tasks only) |
+| `/status` | Open tasks · current handover · branch · last commits |
+| `/backlog [Tnnn]` | The backlog as a table, or one task by id |
+| `/submit <desc>` | Refine a raw idea into a `T###` entry in `docs/plan.md` |
+| `/run` | Serial loop: next task → implement → verify → commit → repeat |
+| `/swarm` | Parallel-wave execution (file-disjoint tasks only) |
 | `/rollover [title]` | Manual handover checkpoint with carry-forward |
 | `/memory [current\|list\|search\|validate]` | Inspect the memory backend |
 | `/doctor` | Run the 14 health checks |
-| `/new-task <slug>` | Scaffold `$PROJECTS_DIR/<N>_<slug>/` with template README + docs/ + archive/ |
+| `/new-task <slug>` | Scaffold `$PROJECTS_DIR/<N>_<slug>/` with README + docs/ + archive/ |
 
-`/plan` is reserved by Claude Code's built-in plan mode. Use `/backlog`.
+> `/plan` belongs to Claude Code's built-in plan mode — iris uses `/backlog`.
 
 ## Hooks
 
-| Event | Script | What it does |
+| Event | What it does |
+|---|---|
+| `SessionStart` | Reads `memory.py current` and injects the handover as a `## iris context` block |
+| `PreCompact` | Writes the next handover (carry-forward) right before Claude compacts |
+| `PreToolUse(Bash)` | Blocks `git commit`/`git tag` bodies that carry an AI signature — fails open on anything malformed |
+
+All three are wrapped so a broken script never blocks your session.
+
+## Memory
+
+Two backends, one CLI. Switch with `MEMORY_BACKEND` in `.env`.
+
+| Backend | Storage | For |
 |---|---|---|
-| `SessionStart` | `.claude/hooks/session-start.sh` | Reads `memory.py current` and injects the handover body as a `## iris context` block |
-| `PreCompact` | `.claude/hooks/pre-compact.sh` | Auto-runs `/rollover` semantics. Writes a new handover before Claude compacts. |
-| `PreToolUse(Bash)` | `.claude/hooks/block-ai-commit-trailers.sh` | Blocks `git commit` whose message body contains an AI signature. Fails open on any malformed input. |
+| `markdown` *(default)* | `handovers/handover_NNN.md` at repo root | Zero deps. Plain files. Grep-friendly. Isolated per project. |
+| `obsidian` | `$OBSIDIAN_VAULT/work/handovers/<project>/` | Handovers searchable inside your vault, namespaced per project. |
 
-All three are wrapped so they never block a session if the underlying script
-breaks.
+`scripts/migrate-handovers.py` lifts an existing markdown corpus into a vault, preserving the prev/next chain as `[[wikilinks]]`.
 
-## Memory backends
+## Multi-project
 
-| Backend | Storage | When to use |
-|---|---|---|
-| `markdown` (default) | `handovers/handover_NNN.md` at repo root | Zero external deps. Plain files. Easy to grep. Isolated per project. |
-| `obsidian` | `$OBSIDIAN_VAULT/work/handovers/<project>/<date>__<slug>.md` | You already use Obsidian and want handovers searchable from your vault. |
-
-Switch via `MEMORY_BACKEND` in `.env`. `scripts/migrate-handovers.py` moves an
-existing markdown corpus into a vault, preserving the prev/next chain via
-`[[wikilinks]]`.
-
-## Work many projects at once
-
-iris resolves "repo root" from `$IRIS_ROOT` (else the current working
-directory) on every call, so each project's `handovers/`, `.iris-state/`
-(event log + `run.lock`), and `docs/plan.md` are rooted at *that* project.
-Open a session in repo A and another in repo B and they never touch each
-other's state.
+iris resolves *repo root* from `$IRIS_ROOT` (else the working directory) on every call, so each project's `handovers/`, `.iris-state/` (event log + `run.lock`), and `docs/plan.md` live under that project. One source, any number of isolated installs, worked in parallel.
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'background':'#050506','primaryColor':'#11131d','primaryTextColor':'#ECEDF1','primaryBorderColor':'#5E6AD2','lineColor':'#5E6AD2','textColor':'#9aa1b8','fontFamily':'ui-monospace, monospace','clusterBkg':'#0a0a0e','clusterBorder':'#23253a'}}}%%
 flowchart TD
-    iris["iris source<br/>~/Tools/iris"]
-    iris -. symlinks .-> A
-    iris -. symlinks .-> B
-    iris -. symlinks .-> C
-    subgraph A["project A"]
-        sa["handovers/ · .iris-state/ · docs/plan.md"]
+    src["iris source · ~/Tools/iris"]
+    src -. symlinks .-> A
+    src -. symlinks .-> B
+    src -. symlinks .-> C
+    subgraph A["repo A"]
+        a["handovers · .iris-state · plan"]
     end
-    subgraph B["project B"]
-        sb["handovers/ · .iris-state/ · docs/plan.md"]
+    subgraph B["repo B"]
+        b["handovers · .iris-state · plan"]
     end
-    subgraph C["project C"]
-        sc["handovers/ · .iris-state/ · docs/plan.md"]
+    subgraph C["repo C"]
+        c["handovers · .iris-state · plan"]
     end
 ```
 
-The obsidian backend shares one vault, so it namespaces each project under
-`work/handovers/<project>/` (the project directory name, or `$IRIS_PROJECT`
-to disambiguate same-named repos). The markdown default needs no
-configuration. `tests/test_multiproject_isolation.py` pins both.
+The obsidian backend shares one vault, so it namespaces handovers under `work/handovers/<project>/` (set `IRIS_PROJECT` to disambiguate same-named repos). `tests/test_multiproject_isolation.py` pins both backends.
 
-## Integrations — the connect-to-anything model
+## Integrations
 
 ```
 integrations/
-├── slack/       # reference adapter (ships)
-├── discord/     # documented stub
-├── webhook/     # documented stub
-└── README.md    # adapter contract
+├── slack/      # reference adapter — ships
+├── discord/    # documented stub
+├── webhook/    # documented stub
+└── README.md   # the adapter contract
 ```
 
-Each adapter is a small Python package with a `start()` entry point and its
-own env-var contract. The core has no idea Slack exists — it just exposes
-`scripts/memory.py`, `scripts/parse-tasks.py`, and the slash commands. An
-adapter wraps those for its medium.
-
-To add one, copy `integrations/slack/` to `integrations/<your-name>/`,
-retarget its sender/receiver, and add the env-var stub to `.env.example`. See
-`integrations/README.md` for the contract and `docs/integrations.md` for a
-worked example.
+The core has no idea Slack exists. It exposes `scripts/memory.py`, `scripts/parse-tasks.py`, and the slash commands; an adapter wraps those for its medium. Copy `integrations/slack/` to `integrations/<name>/`, retarget the sender/receiver, and add an env stub. See `docs/integrations.md` for a worked example.
 
 ## Skills
 
-Four skills are owned by iris and symlinked into every project by `setup.sh`:
+Four skills ship with iris and symlink into every project via `setup.sh`:
 
-| Skill | Purpose |
+| Skill | |
 |---|---|
-| `handovers` | The handover frontmatter contract and writing rules. |
-| `swarm` | The parallel-wave execution protocol. |
-| `commit-style` | Human-voice commit messages; forbids AI footers. |
-| `karpathy-guidelines` | Behavioral coding guidelines — think before coding, simplicity first, surgical changes, goal-driven execution. Vendored from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) (MIT). |
+| `handovers` | The handover frontmatter contract and writing rules |
+| `swarm` | The parallel-wave execution protocol |
+| `commit-style` | Human-voice commit messages; forbids AI footers |
+| `karpathy-guidelines` | Behavioral coding guidelines — think before coding, simplicity first, surgical changes, goal-driven execution · vendored from [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) (MIT) |
 
-`setup.sh` can also symlink in [superpowers](https://github.com/obra/superpowers)
-and [stop-slop](https://github.com/hardikpandya/stop-slop) if you install them.
+`setup.sh` can also link in [superpowers](https://github.com/obra/superpowers) and [stop-slop](https://github.com/hardikpandya/stop-slop) when present.
 
 ## Layout
 
 ```
 iris/
 ├── .claude/
-│   ├── commands/     # slash commands (9 files)
-│   ├── hooks/        # 3 hooks: session-start, pre-compact, block-ai-trailers
-│   ├── skills/       # 4 owned skills: handovers, swarm, commit-style, karpathy-guidelines
-│   └── settings.json # hook wiring
+│   ├── commands/   · 9 slash commands
+│   ├── hooks/      · session-start · pre-compact · block-ai-trailers
+│   ├── skills/     · handovers · swarm · commit-style · karpathy-guidelines
+│   └── settings.json
 ├── scripts/
-│   ├── _iris_paths.py # shared repo-root resolution (the multi-project core)
-│   ├── memory.py      # CLI over the memory backends
-│   ├── doctor.py      # 14 health checks
-│   ├── parse-tasks.py # YAML backlog parser
-│   ├── handover-new.py + handover-validate.py
-│   ├── migrate-handovers.py
-│   ├── build-wave-plan.py  # swarm-wave dependency planner
-│   ├── notify.py + notify-slack.sh
-│   ├── detect-verify.sh    # auto-detect the verify command
-│   └── slackbot-start.sh
-├── integrations/
-│   ├── slack/        # the reference adapter
-│   ├── discord/      # stub
-│   └── webhook/      # stub
-├── tests/            # pytest — primitives, hooks, adapters, multi-project, skills
-├── assets/           # README banner
-├── docs/
-│   ├── plan.md             # template backlog
-│   ├── integrations.md     # adapter authoring guide
-│   └── architecture.md     # how the pieces fit
-├── .env.example
-├── CLAUDE.md         # the agent guide
-├── setup.sh          # one-command install into a target project
-├── Makefile
-├── pyproject.toml
-└── README.md
+│   ├── _iris_paths.py   · shared repo-root resolution (the multi-project core)
+│   ├── memory.py        · CLI over both backends
+│   ├── doctor.py        · 14 health checks
+│   ├── parse-tasks.py · handover-new.py · handover-validate.py
+│   ├── migrate-handovers.py · build-wave-plan.py
+│   ├── notify.py · notify-slack.sh · detect-verify.sh · slackbot-start.sh
+├── integrations/  · slack (ships) · discord · webhook (stubs)
+├── tests/         · primitives · hooks · adapters · multi-project · skills
+├── assets/        · README banner
+├── docs/          · plan.md · integrations.md · architecture.md
+├── setup.sh · CLAUDE.md · Makefile · pyproject.toml
 ```
 
-## Why iris?
+## Why "iris"
 
-Greek messenger goddess. The rainbow bridge between worlds — between your
-Claude session and your terminal, your handovers and your future sessions,
-your backlog and your team's chat. The "connect to anything" brief made the
-name pick itself.
+The Greek messenger goddess — the rainbow bridge between worlds. iris carries word between your session and your terminal, your past and your future, your backlog and your team. A prism refracts one beam of white light into its spectrum; iris refracts one session into everything around it.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
 
 ## Acknowledgements
 
-- [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills)
-  — MIT; the `karpathy-guidelines` skill is vendored from it, derived from
-  [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876)
-  on LLM coding pitfalls.
-- [obsidian-mind](https://github.com/obra/obsidian-mind) — the vault format
-  the obsidian memory backend writes against.
-- [superpowers](https://github.com/obra/superpowers) — skills iris symlinks in
-  if you install them.
-- [stop-slop](https://github.com/hardikpandya/stop-slop) — MIT; iris's
-  `commit-style` skill defers to it on prose voice.
-- [Claude Code](https://docs.anthropic.com/claude/claude-code) — the host.
-  iris is just plumbing; the agent does the work.
+- [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) — MIT; the `karpathy-guidelines` skill is vendored from it, derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls.
+- [obsidian-mind](https://github.com/obra/obsidian-mind) — the vault format the obsidian backend writes against.
+- [superpowers](https://github.com/obra/superpowers) · [stop-slop](https://github.com/hardikpandya/stop-slop) — skills iris links in when present.
+- [Claude Code](https://docs.anthropic.com/claude/claude-code) — the host. iris is plumbing; the agent does the work.
