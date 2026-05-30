@@ -12,11 +12,16 @@ A `integrations/<name>/` directory must contain:
 | File | Required | Purpose |
 |---|---|---|
 | `__init__.py` | yes | Marks the package |
-| `config.py` | yes | Reads adapter-specific env vars, validates them, exports them |
-| `client.py` | yes | Pure-Python adapter for the iris primitives — calls `scripts/memory.py`, `scripts/parse-tasks.py`, etc., via `subprocess`. **No medium-specific imports here.** |
-| `app.py` or `start.py` | yes | The entry point. Wires the medium (Slack Socket Mode, a Discord client, a Flask webhook) to `client.py` |
+| `config.py` | yes (incl. stubs) | Reads adapter-specific env vars, validates them, exports a `healthcheck()` |
+| `client.py` | full adapter | Pure-Python adapter for the iris primitives — calls `scripts/memory.py`, `scripts/parse-tasks.py`, etc., via `subprocess`. **No medium-specific imports here.** |
+| `app.py` or `start.py` | full adapter | The entry point. Wires the medium (Slack Socket Mode, a Discord client, a Flask webhook) to `client.py` |
 | `handlers/` | no | Subdirectory for per-command/per-event handlers |
 | `README.md` | yes | One page: what it does, the env-var contract, smoke-test instructions |
+
+A **stub** adapter (`discord/`, `webhook/`) ships only `config.py` (with a
+`healthcheck()` that reports `wired: false`) + a `README.md` — enough to be
+discovered and contract-tested. `client.py` and the entry point are added when
+the adapter is wired for real (as `slack/` is).
 
 ## Env-var contract
 

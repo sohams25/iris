@@ -212,6 +212,8 @@ def cmd_reward(iid: str, r: float) -> int:
     if inst is None:
         print(f"unknown instinct: {iid} (observe it first)", file=sys.stderr)
         return 1
+    if not -1.0 <= r <= 1.0:
+        print(f"reward {r} out of range [-1, 1] — clipping", file=sys.stderr)
     _rl_update(inst, r, count=True)
     _reservoir_add(iid, r)
     _replay_into(proj)

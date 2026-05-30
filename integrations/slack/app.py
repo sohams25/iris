@@ -25,6 +25,7 @@ from integrations.slack.config import (
     SLACK_BOT_TOKEN,
     SLACK_CHANNEL_ID,
     channel_allowed,
+    require_tokens,
 )
 from integrations.slack import client
 from integrations.slack.handlers import commands, threads
@@ -36,7 +37,13 @@ logging.basicConfig(
 )
 log = logging.getLogger("slackbot")
 
-app = App(token=SLACK_BOT_TOKEN, name="workspace-autonomous")
+if SLACK_BOT_TOKEN:
+    app = App(token=SLACK_BOT_TOKEN, name="iris-slackbot")
+else:
+    # Import-safe placeholder when no token is set — main()'s require_tokens()
+    # produces the real, friendly error before the bot ever tries to connect.
+    app = App(token="xoxb-not-configured", token_verification_enabled=False,
+              name="iris-slackbot")
 
 
 # ---------- app_mention ----------
@@ -151,6 +158,11 @@ def cmd_handover(ack, respond, command):
 # ---------- Startup ----------
 
 def main() -> int:
+    try:
+        require_tokens()
+    except RuntimeError as e:
+        log.error(str(e))
+        return 2
     if not client.health():
         log.warning(
             "iris backend health check failed. The bot will still start, but "
